@@ -1,35 +1,71 @@
+import NavbarMobileMenu from "@/components/navbar/nav-mobile-menu";
+import Navbar from "@/components/navbar/navbar";
+import { useAuth } from "@/hooks/auth/use-auth";
 import { Tabs } from 'expo-router';
-import React from 'react';
+import { Home, Package, ShoppingBag, ShoppingCart } from 'lucide-react-native';
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+export default function TabsLayout() {
+    const { user, logout } = useAuth();
+    const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+    return (
+        <View style={styles.container}>
+            <Navbar />
 
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
+            <Tabs
+                screenOptions={{
+                    tabBarStyle: { display: 'none' },
+                    headerShown: false,
+                }}
+            >
+                <Tabs.Screen
+                    name="index"
+                    options={{
+                        title: 'Home',
+                        tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+                    }}
+                />
+                <Tabs.Screen
+                    name="product/index"
+                    options={{
+                        title: 'Products',
+                        tabBarIcon: ({ color, size }) => <Package size={size} color={color} />,
+                    }}
+                />
+                <Tabs.Screen
+                    name="cart/index"
+                    options={{
+                        title: 'Cart',
+                        tabBarIcon: ({ color, size }) => <ShoppingCart size={size} color={color} />,
+                    }}
+                />
+                <Tabs.Screen
+                    name="orders/index"
+                    options={{
+                        title: 'Orders',
+                        tabBarIcon: ({ color, size }) => <ShoppingBag size={size} color={color} />,
+                    }}
+                />
+            </Tabs>
+
+            <NavbarMobileMenu
+                visible={mobileMenuVisible}
+                user={user}
+                onClose={() => setMobileMenuVisible(false)}
+                onLogout={logout}
+                onOpenAuthModal={(tab) => {
+                    setMobileMenuVisible(false);
+                }}
+            />
+        </View>
+    );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#f9fafb",
+    },
+});
