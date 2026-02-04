@@ -97,8 +97,89 @@ export interface Specifications {
     specificationDetail: string;
 };
 
+export interface Cart {
+    id: string;
+    quantity: number;
+    status: string;
+    userId: string;
+    productId: string;
+    product: Products;
+    variantsId: string;
+    variant: Variants;
+    createdAt: Date;
+    updatedAt: Date;
+    paymentMethod?: PaymentMethod;
+    isPaid?: boolean;
+    paidAt?: string | null;
+    deliveredAt?: string | null;
+    shippingAddress?: {
+        street: string;
+        city: string;
+        state: string;
+        zipCode: string;
+        country: string;
+    };
+    shippingPrice?: number;
+}
+
 export interface Review {
     comment: string;
     helpfulCount: number;
 };
 
+export const PaymentMethods = {
+    COD: 'COD',
+    CREDIT_CARD: 'CREDIT_CARD',
+    BANK_TRANSFER: 'BANK_TRANSFER',
+    E_WALLET: 'E_WALLET'
+} as const;
+
+export type PaymentMethod = typeof PaymentMethods[keyof typeof PaymentMethods];
+
+export const OrderStatusT = {
+    PENDING: 'PENDING',
+    PROCESSING: 'PROCESSING',
+    SHIPPED: 'SHIPPED',
+    DELIVERED: 'DELIVERED',
+    CANCELLED: 'CANCELLED'
+} as const;
+
+export type OrderStatus = typeof OrderStatusT[keyof typeof OrderStatusT];
+
+export const orderStatusConfig: Record<OrderStatus, {
+    label: string;
+    color: string;
+    bgColor: string;
+    icon: string;
+}> = {
+    [OrderStatusT.PENDING]: {
+        label: 'Pending',
+        color: 'text-yellow-600',
+        bgColor: 'bg-yellow-100',
+        icon: '⏳',
+    },
+    [OrderStatusT.PROCESSING]: {
+        label: 'Processing',
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100',
+        icon: '🔄',
+    },
+    [OrderStatusT.SHIPPED]: {
+        label: 'Shipped',
+        color: 'text-purple-600',
+        bgColor: 'bg-purple-100',
+        icon: '🚚',
+    },
+    [OrderStatusT.DELIVERED]: {
+        label: 'Delivered',
+        color: 'text-green-600',
+        bgColor: 'bg-green-100',
+        icon: '✅',
+    },
+    [OrderStatusT.CANCELLED]: {
+        label: 'Cancelled',
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+        icon: '❌',
+    },
+};

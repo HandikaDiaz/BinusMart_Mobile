@@ -8,7 +8,7 @@ export default function useGetAllProduct() {
         return res.data.data;
     };
 
-    const { data, isLoading, refetch } = useQuery<Products[], null, Products[]>({
+    const { data, isLoading, refetch, isRefetching } = useQuery<Products[], null, Products[]>({
         queryKey: ['products'],
         queryFn: getProducts,
         staleTime: 0,
@@ -17,7 +17,8 @@ export default function useGetAllProduct() {
     return {
         data,
         isLoading,
-        refetch
+        refetch,
+        isRefetching
     };
 };
 
@@ -27,7 +28,7 @@ export function useGetAllProductUser() {
         return res.data.data;
     };
 
-    const { data, isLoading, refetch } = useQuery<Products[], null, Products[]>({
+    const { data, isLoading, refetch, isRefetching } = useQuery<Products[], null, Products[]>({
         queryKey: ['myProduct'],
         queryFn: getProducts,
         staleTime: 0,
@@ -36,6 +37,7 @@ export function useGetAllProductUser() {
     return {
         data,
         isLoading,
-        refetch
+        refetch,
+        isRefetching
     };
 };

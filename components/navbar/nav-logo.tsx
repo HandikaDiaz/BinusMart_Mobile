@@ -1,16 +1,19 @@
+import { Link } from 'expo-router';
 import { ShoppingBag } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function NavbarLogo() {
     return (
         <View style={styles.container}>
-            <View style={styles.logoContainer}>
-                <View style={styles.logoIcon}>
-                    <ShoppingBag size={24} color="#fff" />
+            <Link href={'/(tabs)'} style={styles.logoContainer}>
+                <View style={styles.logoContainer}>
+                    <View style={styles.logoIcon}>
+                        <ShoppingBag size={24} color="#fff" />
+                    </View>
+                    <Text style={styles.logoText}>BinusMart</Text>
                 </View>
-                <Text style={styles.logoText}>BinusMart</Text>
-            </View>
-        </View>
+            </Link>
+        </View >
     );
 }
 

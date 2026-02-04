@@ -121,7 +121,7 @@ export default function AllProduct({
             {filteredProducts.length > 0 ? (
                 <FlatList
                     data={filteredProducts}
-                    renderItem={({ item }) => <ProductCard product={item} />}
+                    renderItem={({ item }) => <ProductCard isProductsPage={false} product={item} />}
                     keyExtractor={(item) => item.id}
                     numColumns={2}
                     scrollEnabled={false}
@@ -172,7 +172,6 @@ export default function AllProduct({
                 </View>
             )}
 
-            {/* Sort Modal */}
             {sortModalVisible && (
                 <View style={styles.modalOverlay}>
                     <View style={styles.sortModal}>
