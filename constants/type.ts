@@ -183,3 +183,26 @@ export const orderStatusConfig: Record<OrderStatus, {
         icon: '❌',
     },
 };
+
+
+export const paymentMethodConfig: Record<PaymentMethod, {
+    label: string;
+    icon: string;
+}> = {
+    [PaymentMethods.COD]: {
+        label: 'Cash on Delivery',
+        icon: '💵',
+    },
+    [PaymentMethods.CREDIT_CARD]: {
+        label: 'Credit Card',
+        icon: '💳',
+    },
+    [PaymentMethods.BANK_TRANSFER]: {
+        label: 'Bank Transfer',
+        icon: '🏦',
+    },
+    [PaymentMethods.E_WALLET]: {
+        label: 'E-Wallet',
+        icon: '📱',
+    },
+};

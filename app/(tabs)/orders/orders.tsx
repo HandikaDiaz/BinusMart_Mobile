@@ -1,4 +1,11 @@
-import useCarts from '@/modules/cart/hooks/useCarts';
+import FiltersBar from '@/components/order/filter-bar';
+import HelpSection from '@/components/order/help-section';
+import OrdersHeader from '@/components/order/order-head';
+import { OrdersList } from '@/components/order/order-list';
+import OrderSummary from '@/components/order/order-summary';
+import { StatsCards } from '@/components/order/stats-card';
+import useCarts from '@/hooks/cart/use-cart';
+import useOrders from '@/hooks/order/use-order';
 import React, { useState } from 'react';
 import {
     RefreshControl,
@@ -6,13 +13,6 @@ import {
     StyleSheet,
     View,
 } from 'react-native';
-import FiltersBar from '../components/filter-bar';
-import HelpSection from '../components/help-section';
-import OrdersHeader from '../components/order-header';
-import { OrdersList } from '../components/order-list';
-import OrderSummary from '../components/order-summary';
-import { StatsCards } from '../components/stats-card';
-import useOrders from '../hooks/useOrder';
 
 export default function OrdersView() {
     const { data: orders, refetch, isRefetching } = useCarts();
