@@ -82,12 +82,6 @@ export default function CartView() {
 
     const onlyPendingCart = optimisticCart.filter(item => item.status === 'PENDING');
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const onRefresh = useCallback(async () => {
-        setRefreshing(true);
-        await refetch();
-        setRefreshing(false);
-    }, [refetch]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -97,7 +91,6 @@ export default function CartView() {
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing || isRefetching}
-                        onRefresh={onRefresh}
                         colors={['#3b82f6']}
                         tintColor="#3b82f6"
                     />

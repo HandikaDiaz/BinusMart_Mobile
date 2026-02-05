@@ -1,7 +1,7 @@
 import type { Cart } from '@/constants/type';
 import { Link } from 'expo-router';
-import { Heart, Minus, Plus, Trash2 } from 'lucide-react-native';
-import React, { useState } from 'react';
+import { AlertCircle, Heart, Minus, Plus, Trash2 } from 'lucide-react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Image,
     StyleSheet,
@@ -27,7 +27,10 @@ export default function CartItemCard({
     onQuantityChange,
     onRemove,
 }: CartItemCardProps) {
+    const [localQuantity, setLocalQuantity] = useState(item.quantity);
     const [isUpdating, setIsUpdating] = useState(false);
+    const debounceTimeoutRef = useRef<number | null>(null);
+    const previousQuantityRef = useRef(item.quantity);
 
     const formatCurrency = (amount: number): string => {
         return new Intl.NumberFormat('id-ID', {
@@ -37,16 +40,53 @@ export default function CartItemCard({
         }).format(amount);
     };
 
-    const handleQuantityChange = async (newQuantity: number) => {
-        if (newQuantity < 1 || newQuantity > stock || isUpdating) return;
+    useEffect(() => {
+        if (previousQuantityRef.current !== item.quantity) {
+            setLocalQuantity(item.quantity);
+            previousQuantityRef.current = item.quantity;
+        }
+    }, [item.quantity]);
 
-        setIsUpdating(true);
-        try {
-            await onQuantityChange(item.id, newQuantity);
-        } catch (error) {
-            console.error('Error updating quantity:', error);
-        } finally {
-            setIsUpdating(false);
+    useEffect(() => {
+        return () => {
+            if (debounceTimeoutRef.current) {
+                clearTimeout(debounceTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleQuantityChange = (newQuantity: number) => {
+        if (newQuantity < 1 || newQuantity > stock) return;
+        setLocalQuantity(newQuantity);
+
+        if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current);
+        }
+        debounceTimeoutRef.current = setTimeout(async () => {
+            setIsUpdating(true);
+            try {
+                await onQuantityChange(item.id, newQuantity);
+                previousQuantityRef.current = newQuantity;
+            } catch (error) {
+                setLocalQuantity(previousQuantityRef.current);
+                console.error('Error updating quantity:', error);
+            } finally {
+                setIsUpdating(false);
+            }
+        }, 1000);
+    };
+
+    const handleDecrease = () => {
+        const newQuantity = localQuantity - 1;
+        if (newQuantity >= 1) {
+            handleQuantityChange(newQuantity);
+        }
+    };
+
+    const handleIncrease = () => {
+        const newQuantity = localQuantity + 1;
+        if (newQuantity <= stock) {
+            handleQuantityChange(newQuantity);
         }
     };
 
@@ -60,120 +100,143 @@ export default function CartItemCard({
 
     return (
         <View style={styles.card}>
-            <View style={styles.cardContent}>
-                <View style={styles.mainContent}>
-                    <TouchableOpacity
-                        style={styles.checkboxContainer}
-                        onPress={handleSelect}
-                    >
-                        <View style={[styles.checkbox, isSelected && styles.checkboxChecked]}>
-                            {isSelected && <Text style={styles.checkmark}>✓</Text>}
-                        </View>
-                    </TouchableOpacity>
+            <View style={styles.topRow}>
+                <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={handleSelect}
+                >
+                    <View style={[styles.checkbox, isSelected && styles.checkboxChecked]}>
+                        {isSelected && <View style={styles.checkmark} />}
+                    </View>
+                </TouchableOpacity>
 
-                    <Link href={`/product/${item.product.id}`} asChild>
-                        <TouchableOpacity style={styles.imageContainer}>
-                            <Image
-                                source={{ uri: item.product.image[0]?.url }}
-                                style={styles.productImage}
-                                resizeMode="cover"
+                <Link href={`/product/${item.product.id}`} asChild>
+                    <TouchableOpacity style={styles.imageContainer}>
+                        <Image
+                            source={{ uri: item.product.image[0]?.url }}
+                            style={styles.productImage}
+                            resizeMode="cover"
+                        />
+                    </TouchableOpacity>
+                </Link>
+
+                <View style={styles.productBasicInfo}>
+                    <View style={styles.nameAndPriceRow}>
+                        <Link href={`/product/${item.product.id}`} asChild>
+                            <TouchableOpacity style={styles.productNameContainer}>
+                                <Text style={styles.productName} numberOfLines={2}>
+                                    {item.variant.variantName}
+                                </Text>
+                            </TouchableOpacity>
+                        </Link>
+
+                        <Text style={styles.productPrice}>
+                            {formatCurrency(item.variant.price)}
+                        </Text>
+                    </View>
+
+                    <View style={styles.categoryContainer}>
+                        <View style={styles.categoryBadge}>
+                            <Text style={styles.categoryText}>
+                                {item.product.category}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+            </View>
+
+            {item.product.shortDescription && (
+                <View style={styles.descriptionContainer}>
+                    <Text style={styles.description} numberOfLines={2}>
+                        {item.product.shortDescription}
+                    </Text>
+                </View>
+            )}
+
+            {item.variant.stock < 15 && item.variant.stock > 0 && (
+                <View style={styles.stockWarning}>
+                    <AlertCircle size={14} color="#d97706" />
+                    <Text style={styles.stockWarningText}>
+                        Hanya tersisa {item.variant.stock} item
+                    </Text>
+                </View>
+            )}
+
+            {item.variant.stock === 0 && (
+                <View style={[styles.stockWarning, styles.outOfStockWarning]}>
+                    <AlertCircle size={14} color="#dc2626" />
+                    <Text style={styles.outOfStockText}>
+                        Stok habis
+                    </Text>
+                </View>
+            )}
+
+            <View style={styles.bottomRow}>
+                <View style={styles.quantitySection}>
+                    <Text style={styles.quantityLabel}>Jumlah:</Text>
+
+                    <View style={styles.quantityControls}>
+                        <TouchableOpacity
+                            style={[
+                                styles.quantityButton,
+                                localQuantity <= 1 && styles.quantityButtonDisabled
+                            ]}
+                            onPress={handleDecrease}
+                            disabled={localQuantity <= 1 || isUpdating || item.variant.stock === 0}
+                        >
+                            <Minus
+                                size={16}
+                                color={localQuantity <= 1 ? '#9ca3af' : '#374151'}
                             />
                         </TouchableOpacity>
-                    </Link>
 
-                    <View style={styles.detailsContainer}>
-                        <View style={styles.detailsHeader}>
-                            <View style={styles.productInfo}>
-                                <Link href={`/product/${item.product.id}`} asChild>
-                                    <TouchableOpacity>
-                                        <Text style={styles.productName} numberOfLines={1}>
-                                            {item.variant.variantName}
-                                        </Text>
-                                    </TouchableOpacity>
-                                </Link>
-
-                                <View style={styles.badgesContainer}>
-                                    <View style={styles.categoryBadge}>
-                                        <Text style={styles.categoryText}>{item.product.category}</Text>
-                                    </View>
-                                    {item.variant.stock < 15 && (
-                                        <View style={styles.stockBadge}>
-                                            <Text style={styles.stockText}>
-                                                Only {item.variant.stock} left
-                                            </Text>
-                                        </View>
-                                    )}
+                        <View style={styles.quantityDisplay}>
+                            <Text style={styles.quantityText}>{localQuantity}</Text>
+                            {isUpdating && (
+                                <View style={styles.updatingIndicator}>
+                                    <View style={styles.updatingDot} />
                                 </View>
-
-                                {item.product.shortDescription && (
-                                    <Text style={styles.description} numberOfLines={2}>
-                                        {item.product.shortDescription}
-                                    </Text>
-                                )}
-                            </View>
-
-                            <View style={styles.priceContainer}>
-                                <Text style={styles.totalPrice}>
-                                    {formatCurrency(item.variant.price * item.quantity)}
-                                </Text>
-                                <Text style={styles.unitPrice}>
-                                    {formatCurrency(item.variant.price)} each
-                                </Text>
-                            </View>
+                            )}
                         </View>
 
-                        <View style={styles.actionsContainer}>
-                            <View style={styles.quantityContainer}>
-                                <View style={styles.quantityControls}>
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.quantityButton,
-                                            item.quantity <= 1 && styles.quantityButtonDisabled
-                                        ]}
-                                        onPress={() => handleQuantityChange(item.quantity - 1)}
-                                        disabled={item.quantity <= 1 || isUpdating}
-                                    >
-                                        <Minus size={14} color={item.quantity <= 1 ? '#9ca3af' : '#374151'} />
-                                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.quantityButton,
+                                localQuantity >= item.variant.stock && styles.quantityButtonDisabled
+                            ]}
+                            onPress={handleIncrease}
+                            disabled={localQuantity >= item.variant.stock || isUpdating || item.variant.stock === 0}
+                        >
+                            <Plus
+                                size={16}
+                                color={localQuantity >= item.variant.stock ? '#9ca3af' : '#374151'}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
 
-                                    <Text style={styles.quantityText}>{item.quantity}</Text>
+                <View style={styles.rightSection}>
+                    <View style={styles.totalPriceContainer}>
+                        <Text style={styles.totalPriceLabel}>Total:</Text>
+                        <Text style={styles.totalPrice}>
+                            {formatCurrency(item.variant.price * localQuantity)}
+                        </Text>
+                    </View>
 
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.quantityButton,
-                                            item.quantity >= item.variant.stock && styles.quantityButtonDisabled
-                                        ]}
-                                        onPress={() => handleQuantityChange(item.quantity + 1)}
-                                        disabled={item.quantity >= item.variant.stock || isUpdating}
-                                    >
-                                        <Plus size={14} color={item.quantity >= item.variant.stock ? '#9ca3af' : '#374151'} />
-                                    </TouchableOpacity>
-                                </View>
+                    <View style={styles.actionButtons}>
+                        <TouchableOpacity
+                            style={[styles.iconButton, styles.wishlistButton]}
+                            disabled={item.variant.stock === 0}
+                        >
+                            <Heart size={18} color="#6b7280" />
+                        </TouchableOpacity>
 
-                                <Text style={styles.stockStatus}>
-                                    {item.variant.stock > 0 ? (
-                                        <Text style={styles.inStockText}>In Stock</Text>
-                                    ) : (
-                                        <Text style={styles.outOfStockText}>Out of Stock</Text>
-                                    )}
-                                </Text>
-                            </View>
-
-                            <View style={styles.itemActions}>
-                                <TouchableOpacity style={styles.actionButton}>
-                                    <Heart size={16} color="#6b7280" />
-                                    <Text style={styles.actionText}>Save</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    style={[styles.actionButton]}
-                                    onPress={handleRemove}
-                                >
-                                    <Trash2 size={16} color="#dc2626" />
-                                    <Text style={[styles.actionText, styles.removeText]}>Remove</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        <TouchableOpacity
+                            style={[styles.iconButton, styles.removeButton]}
+                            onPress={handleRemove}
+                        >
+                            <Trash2 size={18} color="#dc2626" />
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
@@ -184,177 +247,235 @@ export default function CartItemCard({
 const styles = StyleSheet.create({
     card: {
         backgroundColor: '#ffffff',
-        borderRadius: 8,
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
-            height: 2,
+            height: 1,
         },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
     },
-    cardContent: {
-        padding: 16,
-    },
-    mainContent: {
+    topRow: {
         flexDirection: 'row',
-        gap: 12,
+        alignItems: 'flex-start',
+        marginBottom: 12,
     },
     checkboxContainer: {
-        paddingTop: 4,
+        marginRight: 12,
+        marginTop: 4,
     },
     checkbox: {
         width: 20,
         height: 20,
         borderWidth: 2,
         borderColor: '#d1d5db',
-        borderRadius: 4,
+        borderRadius: 6,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#ffffff',
     },
     checkboxChecked: {
         backgroundColor: '#3b82f6',
         borderColor: '#3b82f6',
     },
     checkmark: {
-        color: '#ffffff',
-        fontSize: 12,
-        fontWeight: 'bold',
+        width: 10,
+        height: 10,
+        backgroundColor: '#ffffff',
+        borderRadius: 2,
     },
     imageContainer: {
-        width: 96,
-        height: 96,
+        width: 80,
+        height: 80,
         borderRadius: 8,
         overflow: 'hidden',
-        backgroundColor: '#f3f4f6',
+        backgroundColor: '#f9fafb',
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        marginRight: 12,
     },
     productImage: {
         width: '100%',
         height: '100%',
     },
-    detailsContainer: {
+    productBasicInfo: {
         flex: 1,
-        minWidth: 0,
     },
-    detailsHeader: {
+    nameAndPriceRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 16,
+        alignItems: 'flex-start',
+        marginBottom: 8,
     },
-    productInfo: {
+    productNameContainer: {
         flex: 1,
-        marginRight: 12,
+        marginRight: 8,
     },
     productName: {
         fontSize: 16,
         fontWeight: '600',
         color: '#111827',
-        marginBottom: 4,
+        lineHeight: 20,
     },
-    badgesContainer: {
+    productPrice: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#111827',
+    },
+    categoryContainer: {
         flexDirection: 'row',
-        gap: 8,
-        marginBottom: 8,
+        flexWrap: 'wrap',
     },
     categoryBadge: {
         backgroundColor: '#f3f4f6',
-        paddingHorizontal: 8,
+        paddingHorizontal: 10,
         paddingVertical: 4,
-        borderRadius: 4,
+        borderRadius: 6,
     },
     categoryText: {
         fontSize: 12,
-        color: '#374151',
+        color: '#4b5563',
+        fontWeight: '500',
     },
-    stockBadge: {
-        backgroundColor: '#3b82f6',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
-    },
-    stockText: {
-        fontSize: 12,
-        color: '#ffffff',
+    descriptionContainer: {
+        marginBottom: 12,
     },
     description: {
         fontSize: 14,
         color: '#6b7280',
         lineHeight: 20,
     },
-    priceContainer: {
-        alignItems: 'flex-end',
+    stockWarning: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fef3c7',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 6,
+        marginBottom: 12,
+        alignSelf: 'flex-start',
     },
-    totalPrice: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#111827',
-        marginBottom: 4,
+    outOfStockWarning: {
+        backgroundColor: '#fef2f2',
     },
-    unitPrice: {
-        fontSize: 14,
-        color: '#6b7280',
+    stockWarningText: {
+        fontSize: 12,
+        color: '#92400e',
+        fontWeight: '500',
+        marginLeft: 6,
     },
-    actionsContainer: {
+    outOfStockText: {
+        fontSize: 12,
+        color: '#dc2626',
+        fontWeight: '500',
+        marginLeft: 6,
+    },
+    bottomRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        borderTopWidth: 1,
+        borderTopColor: '#f3f4f6',
+        paddingTop: 12,
     },
-    quantityContainer: {
-        alignItems: 'flex-start',
+    quantitySection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    quantityLabel: {
+        fontSize: 14,
+        color: '#4b5563',
+        marginRight: 12,
+        fontWeight: '500',
     },
     quantityControls: {
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#d1d5db',
-        borderRadius: 6,
+        borderRadius: 8,
         overflow: 'hidden',
     },
     quantityButton: {
-        width: 32,
-        height: 32,
+        width: 36,
+        height: 36,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#f9fafb',
     },
     quantityButtonDisabled: {
         backgroundColor: '#f3f4f6',
     },
-    quantityText: {
+    quantityDisplay: {
         width: 40,
-        textAlign: 'center',
-        fontSize: 16,
+        height: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ffffff',
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderColor: '#d1d5db',
+        position: 'relative',
+    },
+    quantityText: {
+        fontSize: 14,
         fontWeight: '600',
         color: '#111827',
     },
-    stockStatus: {
-        fontSize: 14,
+    updatingIndicator: {
+        position: 'absolute',
+        top: -3,
+        right: -3,
+        width: 8,
+        height: 8,
+    },
+    updatingDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#3b82f6',
+    },
+    rightSection: {
+        alignItems: 'flex-end',
+    },
+    totalPriceContainer: {
+        alignItems: 'flex-end',
+        marginBottom: 8,
+    },
+    totalPriceLabel: {
+        fontSize: 12,
         color: '#6b7280',
-        marginTop: 4,
+        marginBottom: 2,
     },
-    inStockText: {
-        color: '#166534',
+    totalPrice: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#111827',
     },
-    outOfStockText: {
-        color: '#dc2626',
-    },
-    itemActions: {
+    actionButtons: {
         flexDirection: 'row',
         gap: 8,
     },
-    actionButton: {
-        flexDirection: 'row',
+    iconButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 8,
+        justifyContent: 'center',
         alignItems: 'center',
-        gap: 4,
-        paddingHorizontal: 8,
-        paddingVertical: 6,
+        backgroundColor: '#f9fafb',
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
     },
-    actionText: {
-        fontSize: 14,
-        color: '#6b7280',
+    wishlistButton: {
+        backgroundColor: '#ffffff',
     },
-    removeText: {
-        color: '#dc2626',
+    removeButton: {
+        backgroundColor: '#ffffff',
     },
 });
