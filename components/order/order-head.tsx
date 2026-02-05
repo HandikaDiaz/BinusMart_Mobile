@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { ShoppingBag } from 'lucide-react-native';
+import { ShoppingBag, ShoppingCart } from 'lucide-react-native';
 import React from 'react';
 import {
     StyleSheet,
@@ -21,13 +21,22 @@ export default function OrdersHeader() {
                             Track, return, or buy things again from your orders
                         </Text>
                     </View>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => router.push('/')}
-                    >
-                        <ShoppingBag size={16} color="white" />
-                        <Text style={styles.buttonText}>Continue Shopping</Text>
-                    </TouchableOpacity>
+                    <View style={styles.buttonCard}>
+                        <TouchableOpacity
+                            style={styles.buttonCart}
+                            onPress={() => router.push('/')}
+                        >
+                            <ShoppingCart size={16} color="white" />
+                            <Text style={styles.buttonText}>My Cart</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.buttonShopping}
+                            onPress={() => router.push('/')}
+                        >
+                            <ShoppingBag size={16} color="white" />
+                            <Text style={styles.buttonText}>Continue Shopping</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </View>
@@ -53,9 +62,7 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        gap: 12,
     },
     title: {
         fontSize: 28,
@@ -67,7 +74,23 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#6b7280',
     },
-    button: {
+    buttonCard: {
+        width: '100%',
+        flexDirection: 'row',
+        gap: 12,
+    },
+    buttonCart: {
+        width: '48.5%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: '#3b82f6',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 8,
+    },
+    buttonShopping: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,

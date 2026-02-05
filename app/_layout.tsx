@@ -18,7 +18,7 @@ export default function RootLayout() {
           <BottomSheetModalProvider>
             <QueryClientProvider client={queryClient}>
               <AuthProvider>
-                <Stack screenOptions={{ headerShown: true }} />
+                <Stack screenOptions={{ headerShown: false }} />
                 <Toast />
               </AuthProvider>
             </QueryClientProvider>
