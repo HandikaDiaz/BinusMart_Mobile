@@ -32,6 +32,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import OrderTimeline from './order-timeline';
 
 interface OrderCardProps {
@@ -64,23 +65,40 @@ export default function OrderCard({ order }: OrderCardProps) {
     const statusColor = orderStatusConfig[enhancedOrder.status as OrderStatus];
 
     const handleViewDetails = () => {
-        router.push(`/order/${enhancedOrder.id}`);
+        router.push(`/product/${enhancedOrder.product.id}`);
     };
 
     const handleTrackOrder = () => {
-        router.push(`/tracking/${enhancedOrder.id}`);
+        Toast.show({
+            type: 'success',
+            text1: 'Success',
+            text2: 'Order tracked successfully!',
+        })
     };
 
     const handleRateProduct = () => {
-        router.push(`/review/${enhancedOrder.productId}`);
+        Toast.show({
+            type: 'success',
+            text1: 'Success',
+            text2: 'Product rated successfully!',
+        })
     };
 
     const handleBuyAgain = () => {
-        console.log('Buy again:', enhancedOrder.productId);
+        Toast.show({
+            type: 'success',
+            text1: 'Success',
+            text2: 'Product bought again successfully!',
+        })
     };
 
     const handleCancelOrder = () => {
         console.log('Cancel order:', enhancedOrder.id);
+        Toast.show({
+            type: 'success',
+            text1: 'Order Cancelled',
+            text2: 'Your order has been cancelled successfully.',
+        })
     };
 
     return (
@@ -147,76 +165,78 @@ export default function OrderCard({ order }: OrderCardProps) {
             <View style={styles.divider} />
 
             <View style={styles.infoGrid}>
-                <View style={styles.infoSection}>
-                    <View style={styles.sectionHeader}>
-                        <CreditCard size={16} color="#4b5563" />
-                        <Text style={styles.sectionTitle}>Payment Information</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Method:</Text>
-                        <Text style={styles.infoValue}>
-                            {paymentConfig?.icon} {paymentConfig?.label}
-                        </Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>Status:</Text>
-                        <Text style={[
-                            styles.infoValue,
-                            enhancedOrder.isPaid ? styles.paidStatus : styles.pendingStatus
-                        ]}>
-                            {enhancedOrder.isPaid ? 'Paid' : 'Pending Payment'}
-                        </Text>
-                    </View>
-                    {enhancedOrder.paidAt && typeof enhancedOrder.paidAt === 'string' && (
+                <View style={styles.infoContainer}>
+                    <View style={styles.infoSection}>
+                        <View style={styles.sectionHeader}>
+                            <CreditCard size={16} color="#4b5563" />
+                            <Text style={styles.sectionTitle}>Payment Information</Text>
+                        </View>
                         <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Paid on:</Text>
+                            <Text style={styles.infoLabel}>Method:</Text>
                             <Text style={styles.infoValue}>
-                                {formatDate(new Date(enhancedOrder.paidAt))}
+                                {paymentConfig?.icon} {paymentConfig?.label}
                             </Text>
                         </View>
-                    )}
-                </View>
-
-                <View style={styles.verticalDivider} />
-
-                <View style={styles.infoSection}>
-                    <View style={styles.sectionHeader}>
-                        <Truck size={16} color="#4b5563" />
-                        <Text style={styles.sectionTitle}>Shipping Information</Text>
-                    </View>
-                    {enhancedOrder.shippingAddress ? (
-                        <>
-                            <View style={styles.addressRow}>
-                                <MapPin size={16} color="#6b7280" />
-                                <View style={styles.addressText}>
-                                    <Text style={styles.addressStreet}>
-                                        {enhancedOrder.shippingAddress.street}
-                                    </Text>
-                                    <Text style={styles.addressDetails}>
-                                        {enhancedOrder.shippingAddress.city}, {enhancedOrder.shippingAddress.state} {enhancedOrder.shippingAddress.zipCode}
-                                    </Text>
-                                    <Text style={styles.addressDetails}>
-                                        {enhancedOrder.shippingAddress.country}
-                                    </Text>
-                                </View>
-                            </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.infoLabel}>Status:</Text>
+                            <Text style={[
+                                styles.infoValue,
+                                enhancedOrder.isPaid ? styles.paidStatus : styles.pendingStatus
+                            ]}>
+                                {enhancedOrder.isPaid ? 'Paid' : 'Pending Payment'}
+                            </Text>
+                        </View>
+                        {enhancedOrder.paidAt && typeof enhancedOrder.paidAt === 'string' && (
                             <View style={styles.infoRow}>
-                                <Text style={styles.infoLabel}>Shipping Cost:</Text>
+                                <Text style={styles.infoLabel}>Paid on:</Text>
                                 <Text style={styles.infoValue}>
-                                    {formatCurrency(enhancedOrder.shippingPrice || 0)}
+                                    {formatDate(new Date(enhancedOrder.paidAt))}
                                 </Text>
                             </View>
-                        </>
-                    ) : (
-                        <Text style={styles.noAddress}>No shipping address provided</Text>
-                    )}
-                </View>
+                        )}
+                    </View>
 
-                <View style={styles.verticalDivider} />
+                    <View style={styles.verticalDivider} />
 
-                <View style={styles.infoSection}>
-                    <OrderTimeline order={enhancedOrder} />
+                    <View style={styles.infoSection}>
+                        <View style={styles.sectionHeader}>
+                            <Truck size={16} color="#4b5563" />
+                            <Text style={styles.sectionTitle}>Shipping Information</Text>
+                        </View>
+                        {enhancedOrder.shippingAddress ? (
+                            <>
+                                <View style={styles.addressRow}>
+                                    <MapPin size={16} color="#6b7280" />
+                                    <View style={styles.addressText}>
+                                        <Text style={styles.addressStreet}>
+                                            {enhancedOrder.shippingAddress.street}
+                                        </Text>
+                                        <Text style={styles.addressDetails}>
+                                            {enhancedOrder.shippingAddress.city}, {enhancedOrder.shippingAddress.state} {enhancedOrder.shippingAddress.zipCode}
+                                        </Text>
+                                        <Text style={styles.addressDetails}>
+                                            {enhancedOrder.shippingAddress.country}
+                                        </Text>
+                                    </View>
+                                </View>
+                                <View style={styles.infoRow}>
+                                    <Text style={styles.infoLabel}>Shipping Cost:</Text>
+                                    <Text style={styles.infoValue}>
+                                        {formatCurrency(enhancedOrder.shippingPrice || 0)}
+                                    </Text>
+                                </View>
+                            </>
+                        ) : (
+                            <Text style={styles.noAddress}>No shipping address provided</Text>
+                        )}
+                    </View>
                 </View>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.timelineSection}>
+                <OrderTimeline order={enhancedOrder} />
             </View>
 
             <View style={[styles.footer, { backgroundColor: `${statusColor.bgColor}20` }]}>
@@ -386,9 +406,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
     },
+    infoContainer: {
+        flexDirection: 'row',
+    },
     infoSection: {
         flex: 1,
-        minWidth: '33%',
+        minWidth: '50%',
         padding: 16,
     },
     sectionHeader: {
@@ -449,6 +472,12 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#6b7280',
         fontStyle: 'italic',
+    },
+    // New style for timeline section
+    timelineSection: {
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#e5e7eb',
     },
     footer: {
         padding: 16,

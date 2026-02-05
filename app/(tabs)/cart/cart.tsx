@@ -6,9 +6,10 @@ import useCartActions, { useDeleteCart, useUpdateCart } from '@/hooks/cart/use-a
 import useCarts from '@/hooks/cart/use-cart';
 import useDebouncedCart from '@/hooks/cart/use-debounce-cart';
 import useOptimisticCartManager from '@/hooks/cart/use-optimistic-cart';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
+    RefreshControl,
     SafeAreaView,
     ScrollView,
     StatusBar,
@@ -17,7 +18,8 @@ import {
 } from 'react-native';
 
 export default function CartView() {
-    const { data: cart, isLoading } = useCarts();
+    const { data: cart, isLoading, refetch, isRefetching } = useCarts();
+    const [refreshing, setRefreshing] = useState(false);
     const optimisticManager = useOptimisticCartManager();
     const debouncedCart = useDebouncedCart();
     const optimisticCart = optimisticManager.applyOptimisticUpdates(cart || []);
@@ -80,10 +82,27 @@ export default function CartView() {
 
     const onlyPendingCart = optimisticCart.filter(item => item.status === 'PENDING');
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await refetch();
+        setRefreshing(false);
+    }, [refetch]);
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" />
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing || isRefetching}
+                        onRefresh={onRefresh}
+                        colors={['#3b82f6']}
+                        tintColor="#3b82f6"
+                    />
+                }
+            >
                 <CartHeader
                     cart={onlyPendingCart}
                     selectedCount={selectedCount}

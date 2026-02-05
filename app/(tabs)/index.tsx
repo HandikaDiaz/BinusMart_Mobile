@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 
 export default function HomeView() {
-    const { data: productsData, isLoading, refetch } = useGetAllProduct();
+    const { data: productsData, isLoading, refetch, isRefetching } = useGetAllProduct();
     const [refreshing, setRefreshing] = useState(false);
 
     const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -122,7 +122,12 @@ export default function HomeView() {
         <ScrollView
             style={styles.container}
             refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                <RefreshControl
+                    refreshing={refreshing || isRefetching}
+                    onRefresh={onRefresh}
+                    colors={['#3b82f6']}
+                    tintColor="#3b82f6"
+                />
             }
         >
             <OpeningCard

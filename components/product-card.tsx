@@ -79,7 +79,6 @@ const ProductCard = React.memo(({
                 activeOpacity={0.9}
                 disabled={isProductsPage}
             >
-                {/* Image Section */}
                 <View style={styles.imageContainer}>
                     <Image
                         source={{ uri: mainImage }}
@@ -87,14 +86,12 @@ const ProductCard = React.memo(({
                         resizeMode="cover"
                     />
 
-                    {/* Category Badge */}
                     <View style={[styles.categoryBadge, { backgroundColor: categoryColor.bg }]}>
                         <Text style={[styles.categoryText, { color: categoryColor.text }]}>
                             {product.category}
                         </Text>
                     </View>
 
-                    {/* Out of Stock Overlay */}
                     {isOutOfStock && (
                         <View style={styles.outOfStockOverlay}>
                             <View style={styles.outOfStockBadge}>
@@ -104,7 +101,6 @@ const ProductCard = React.memo(({
                     )}
                 </View>
 
-                {/* Content Section */}
                 <View style={styles.content}>
                     <Text style={styles.productName} numberOfLines={1}>
                         {product.productName}
@@ -114,7 +110,6 @@ const ProductCard = React.memo(({
                         {product.shortDescription || 'No description available'}
                     </Text>
 
-                    {/* Price and Rating Row */}
                     <View style={styles.priceRatingRow}>
                         <Text style={styles.price}>Rp {price}</Text>
 
@@ -125,7 +120,6 @@ const ProductCard = React.memo(({
                         </View>
                     </View>
 
-                    {/* Seller Info */}
                     <View style={styles.sellerContainer}>
                         <View style={styles.avatar}>
                             <Text style={styles.avatarText}>{sellerInitial}</Text>
@@ -136,7 +130,6 @@ const ProductCard = React.memo(({
                     </View>
                 </View>
 
-                {/* Footer Actions */}
                 <View style={styles.footer}>
                     {isProductsPage ? (
                         <View style={styles.actionButtons}>
@@ -168,7 +161,6 @@ const ProductCard = React.memo(({
                 </View>
             </TouchableOpacity>
 
-            {/* Delete Modal */}
             <DeleteProductModal
                 visible={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
