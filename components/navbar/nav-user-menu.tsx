@@ -1,4 +1,4 @@
-import { Link, useRouter } from 'expo-router'; // ← Hapus Link dari sini
+import { Link, useRouter } from 'expo-router';
 
 import { LogOut, Package, User as ProfileIcon, ShoppingCart, User as UserIcon } from 'lucide-react-native';
 import { useState } from 'react';
@@ -24,12 +24,12 @@ export default function NavbarUserMenu({
     onOpenAuthModal,
 }: NavbarUserMenuProps) {
     const [menuVisible, setMenuVisible] = useState(false);
-    const router = useRouter(); // ← Pakai useRouter dari expo-router
+    const router = useRouter();
 
     const handleLogout = () => {
         onLogout();
         setMenuVisible(false);
-        router.replace('/(tabs)'); // ← Navigasi ke home
+        router.replace('/(tabs)');
     };
 
 
@@ -99,7 +99,6 @@ export default function NavbarUserMenu({
                                     >
                                         <TouchableOpacity
                                             style={styles.menuItem}
-                                        // onPress={() => navigateTo('/(tabs)/orders')} // ← Perbaiki path
                                         >
                                             <Package size={20} color="#374151" />
                                             <Text style={styles.menuItemText}>My Orders</Text>

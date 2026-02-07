@@ -1,6 +1,7 @@
 import api from "@/api/api";
 import type { Products } from "@/constants/type";
 import { useQuery } from "@tanstack/react-query";
+import * as SecureStore from 'expo-secure-store';
 
 export default function useGetAllProduct() {
     async function getProducts() {
@@ -24,7 +25,13 @@ export default function useGetAllProduct() {
 
 export function useGetAllProductUser() {
     async function getProducts() {
-        const res = await api.get("/product/my-product");
+        const token = await SecureStore.getItemAsync('token');
+        const res = await api.get("/product/my-product", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+        );
         return res.data.data;
     };
 
