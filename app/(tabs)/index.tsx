@@ -110,6 +110,7 @@ export default function HomeView() {
     }, [productsData, selectedCategory, debouncedSearchQuery, sortBy]);
 
     useEffect(() => {
+        console.log('Search results:', filteredProducts.length);
     }, [filteredProducts]);
 
     const handleClearAllFilters = () => {

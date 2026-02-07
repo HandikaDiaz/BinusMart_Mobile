@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "marketplace-mobile",
+    "name": "BINUSmart",
     "slug": "binusmart",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -33,13 +33,9 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-screen-binusmart.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "image": "./assets/images/android-icon-foreground.png",
+          "resizeMode": "cover",
+          "backgroundColor": "#ffffff"
         }
       ],
       "expo-secure-store"
