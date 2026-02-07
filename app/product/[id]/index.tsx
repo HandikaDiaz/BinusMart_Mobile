@@ -30,6 +30,7 @@ import {
 } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 
+import Navbar from '@/components/navbar/navbar';
 import { useAuth } from '@/hooks/auth/use-auth';
 import useCreateCart from '@/hooks/cart/use-create-cart';
 import useGetProductDetails from '@/hooks/product/use-product';
@@ -349,6 +350,7 @@ export default function ProductDetailView() {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <ScrollView showsVerticalScrollIndicator={false}>
+                <Navbar />
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButtonIcon}>
                         <ArrowLeft size={24} color="#374151" />

@@ -48,7 +48,7 @@ export default function AuthSheet({
             <View style={styles.overlay}>
                 <View style={styles.container}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>Welcome to BinusMart</Text>
+                        <Text style={styles.title}>Welcome to BINUSmart</Text>
                         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
                             <X size={24} color="#6b7280" />
                         </TouchableOpacity>
